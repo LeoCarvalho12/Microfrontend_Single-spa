@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MicroFrontends</title>
+  <script src="/single-spa.js"></script>
+  <link href="/app-shell.css" rel="stylesheet" />
+  <link rel="stylesheet" 
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+/>
+
+<script type="importmap">
+  {
+    "imports": {
+      "single-spa": "https://cdn.jsdelivr.net/npm/single-spa@5.9.3/lib/system/single-spa.min.js",
+      "single-spa-angular": "https://cdn.jsdelivr.net/npm/single-spa-angular@9.2.0/lib/esm/single-spa-angular.js",
+      "single-spa-react": "https://cdn.jsdelivr.net/npm/single-spa-react@latest/lib/esm/single-spa-react.js",
+      "single-spa-vue": "https://cdn.jsdelivr.net/npm/single-spa-vue@latest/lib/esm/single-spa-vue.js",
+      "react": "https://cdn.skypack.dev/react@17.0.2",
+      "react-dom": "https://cdn.skypack.dev/react-dom@17.0.2",
+      "react-router-dom": "https://unpkg.com/react-router-dom@5.3.4/umd/react-router-dom.min.js",
+      "@angular/core": "https://esm.sh/@angular/core@19.2.0/fesm2015/core.mjs?target=es2020",
+      "@angular/common": "https://esm.sh/@angular/common@19.2.0/fesm2015/common.mjs?target=es2020",
+      "@angular/common/http": "https://esm.sh/@angular/common@19.2.0/fesm2015/common-http.mjs?target=es2020",
+      "@angular/router": "https://esm.sh/@angular/router@19.2.0/fesm2015/router.mjs?target=es2020",
+      "@angular/platform-browser": "https://esm.sh/@angular/platform-browser@19.2.0/fesm2015/platform-browser.mjs?target=es2020",
+      "@angular/forms": "https://esm.sh/@angular/forms@19.2.0/fesm2015/forms.mjs?target=es2020",
+      "rxjs": "https://esm.sh/rxjs@7.8.0/dist/esm2015/index.js?target=es2020",
+      "zone.js": "https://cdn.jsdelivr.net/npm/zone.js@0.12.0/dist/zone.min.js"
+    }
+  }
+  </script>
+
+</head>
+<body>
+  <div id="app-shell">
+    <div id="app-angular"></div>
+    <div id="app-react"></div>
+    <div id="app-vue"></div>
+  </div>
+  
+  <script type="module">
+    singleSpa.registerApplication(
+      "angular",
+      () => import("http://localhost:3002/dist/pages.min.js"),
+      ({ pathname }) => pathname === "/" || pathname.startsWith("/login")
+    );
+    singleSpa.registerApplication(
+      "react",
+      () => import("http://localhost:3001/pages.min.js"),
+      ({ pathname }) => pathname.startsWith("/product")
+    );
+    singleSpa.registerApplication(
+      "vue",
+      () => import("http://localhost:3003/pages.min.js"),
+      ({ pathname }) => pathname.startsWith("/checkout/")
+    );
+    singleSpa.start();
+  </script>
+  
+  <footer>
+    String aleatória: <strong></strong><br />
+    Gerada ao carregar o app shell<br />
+    Só muda ao recarregar
+  </footer>
+  <script type="module">
+    const randomString = Math.round(Math.random() * 2e5).toString(16);
+    document.querySelector("footer strong").innerHTML = randomString;
+  </script>
+</body>
+</html>

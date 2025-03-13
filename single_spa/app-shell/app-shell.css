@@ -1,0 +1,137 @@
+/* GLOBAL STYLES */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 20px;
+  height: 100%;
+  width: 100%;
+}
+
+a {
+  color: blue;
+}
+
+body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+#app-shell {
+  border: 3px solid #e5a044;
+  position: relative;
+  padding: 1rem;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#app-shell::after {
+  content: "Application Shell (single-spa)";
+  background: #e5a044;
+  position: absolute;
+  color: white;
+  bottom: 0;
+  left: 0;
+  padding: 0.5rem;
+}
+
+#app-angular:not(:empty),
+#app-react:not(:empty),
+#app-vue:not(:empty) {
+  padding: 1rem;
+  position: relative;
+  width: 80%;
+  height: 80%;
+  max-width: 1200px;
+  max-height: 800px;
+  overflow: auto;
+}
+
+#app-shell:not(:empty)::after,
+#app-angular:not(:empty)::after{
+  position: absolute;
+  color: white;
+  display: block;
+  bottom: 0;
+  left: 0;
+  padding: 0.5rem;
+}
+
+#app-react:not(:empty)::after
+{
+  position: absolute;
+  color: white;
+}
+
+#app-vue:not(:empty)::after {
+  position: absolute;
+  color: white;
+  display: block;
+  bottom: 0;
+  left: 0;
+  padding: 0.5rem;
+}
+
+#app-angular:not(:empty)::after,
+#app-react:not(:empty)::after,
+#app-vue:not(:empty)::after {
+  bottom: 0;
+  right: 0;
+}
+
+#app-angular:not(:empty) {
+  border: 3px solid #7c9b2f;
+}
+
+#app-angular:not(:empty)::after {
+  content: "app angular (Angular.js)";
+  background: #7c9b2f;
+}
+
+#app-react:not(:empty) {
+  border: 3px solid #bc3630;
+  padding: 0;
+  width: 80%;
+  height: 80%;
+  max-width: 1200px;
+  max-height: 800px;
+  overflow: auto; 
+  position: relative; 
+}
+
+#app-react:not(:empty)::after {
+  content: "app react (React.js)";
+  background: #bc3630;
+  padding: 0.5rem 1rem;
+  position: sticky;
+  bottom: 0;
+  right: 0;
+  display: block;
+}
+
+#app-vue:not(:empty) {
+  border: 3px solid #5f9dc8;
+}
+
+#app-vue:not(:empty)::after {
+  content: "app vue (Vue.js)";
+  background: #5f9dc8;
+}
+
+footer {
+  margin-top: 1rem;
+  text-align: center;
+}
