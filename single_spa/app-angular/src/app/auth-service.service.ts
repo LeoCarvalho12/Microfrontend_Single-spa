@@ -17,6 +17,10 @@ export class AuthServiceService {
     return this.http.post(`${this.path}/login`, { email, senha });
   }
 
+  cadastrar(data: { nome: string; email: string; senha: string }){
+    return this.http.post(`${this.path}/register`, data);
+  }
+
   private handleError(error: any) {
     const errMsg = error.message 
       ? error.message 

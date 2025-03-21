@@ -1,0 +1,82 @@
+.container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  text-align: center;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.backButton:hover {
+  text-decoration: underline;
+}
+
+.cartTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.cartTable th, .cartTable td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.cartTable th {
+  background-color: #f4f4f4;
+}
+
+.removeButton {
+  background: transparent;
+  color: #555;
+  border: none;
+  padding: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-size: 18px;
+}
+
+.removeButton:hover {
+  color: #dc3545; 
+}
+
+.emptyMessage {
+  font-size: 18px;
+  color: #555;
+}
+
+.total {
+  margin-top: 20px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #222;
+}
+
+.payButton {
+  background: #28a745;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  font-size: 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.3s ease-in-out;
+}
+
+.payButton:hover {
+  background: #218838;
+}
+

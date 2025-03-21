@@ -5,8 +5,9 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
 import { string } from "rollup-plugin-string";
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 const __dirname = process.cwd();
+
 export default {
   input: "src/main.single-spa.ts",
   output: { file: "dist/pages.min.js", format: "esm", sourcemap: true },

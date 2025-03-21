@@ -1,0 +1,32 @@
+<div class="login-container">
+  <h2>Login</h2>
+  <form (ngSubmit)="login()">
+    <div>
+      <label for="email">Email:</label>
+      <input
+        type="email"
+        id="email"
+        [(ngModel)]="email"
+        name="email"
+        [ngModelOptions]="{ standalone: true }"
+        required
+      />
+    </div>
+    <div>
+      <label for="senha">Senha:</label>
+      <input
+        type="password"
+        id="senha"
+        [(ngModel)]="senha"
+        name="senha"
+        [ngModelOptions]="{ standalone: true }"
+        required
+      />
+    </div>
+    <button type="submit">Entrar</button>
+  </form>
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+  <p class="link-cadastro">
+    Não possui conta? <a routerLink="/cadastro">Cadastre-se</a>
+  </p>
+</div>

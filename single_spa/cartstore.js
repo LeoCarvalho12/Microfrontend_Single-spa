@@ -1,36 +1,53 @@
-export const cartstore = {
+import { reactive } from "vue";
+
+export const cartstore = reactive({
   currentUserId: null,
-  cartItems: {},
+  cartItems: [],
 
-  init(userId) {
+  async init(userId) {
+    if (!userId) {
+      console.error("Erro: `userId` está indefinido.");
+      return;
+    }
     this.currentUserId = userId;
-    this.cartItems = JSON.parse(localStorage.getItem(`cart_${userId}`)) || {};
+    await this.updateCartFromAPI();
   },
 
-  getCart() {
-    return this.cartItems;
-  },
+  async updateCartFromAPI() {
+    if (!this.currentUserId) {
+      console.warn("currentUserId não definido.");
+      return;
+    }
+    try {
+      const response = await fetch(`http://localhost:4000/api/cart/${this.currentUserId}`);
+      if (!response.ok) throw new Error(`Erro ao buscar carrinho: ${response.status}`);
 
-  addToCart(id) {
-    this.cartItems[id] = (this.cartItems[id] || 0) + 1;
-    this.saveCart();
-  },
+      const data = await response.json();
 
-  removeFromCart(id) {
-    if (this.cartItems[id]) {
-      delete this.cartItems[id];
-      this.saveCart();
+      this.cartItems = data.itens || [];
+    } catch (error) {
+      console.error("Erro ao buscar carrinho da API:", error);
+      this.cartItems = [];
     }
   },
 
-  clearCart() {
-    this.cartItems = {};
-    localStorage.removeItem(`cart_${this.currentUserId}`);
-    window.dispatchEvent(new Event("cart-updated"));
-  },
-
-  saveCart() {
-    localStorage.setItem(`cart_${this.currentUserId}`, JSON.stringify(this.cartItems));
-    window.dispatchEvent(new Event("cart-updated"));
-  },
-};
+  async removeFromCart(produtoId) {
+    try {
+      const usuario_id = this.currentUserId;
+  
+      const response = await fetch(
+        `http://localhost:4000/api/cart/remove/${produtoId}?usuarioId=${usuario_id}`,
+        { method: "DELETE" }
+      );
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao remover produto");
+      }
+  
+      await this.updateCartFromAPI();
+    } catch (error) {
+      console.error("Erro ao remover produto do carrinho:", error);
+    }
+  }
+});

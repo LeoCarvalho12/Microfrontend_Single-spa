@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Routes, Route, Link, useNavigate, Navigate } from "react-router-dom";
 import singleSpaReact from "single-spa-react";
-import { cartstore } from "../cartstore";
 
+// Componente de Cabeçalho
 const Header = ({ onLogout }) => (
   <div style={{ display: "flex", justifyContent: "space-between", padding: "10px", borderBottom: "1px solid #ccc" }}>
     <h2>Microfrontend</h2>
@@ -11,13 +11,14 @@ const Header = ({ onLogout }) => (
   </div>
 );
 
+// Página de Produtos
 const Home = ({ addToCart, cartCount, navigateToCart }) => {
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
   const [hoveredProduct, setHoveredProduct] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/products")
+    fetch("http://localhost:4000/api/products/product")
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((error) => console.error("Erro ao buscar produtos:", error));
@@ -26,6 +27,13 @@ const Home = ({ addToCart, cartCount, navigateToCart }) => {
   const filteredProducts = products.filter((product) =>
     product.nome.toLowerCase().includes(search.toLowerCase())
   );
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
 
   return (
     <div className="container mt-3">
@@ -49,10 +57,6 @@ const Home = ({ addToCart, cartCount, navigateToCart }) => {
         onChange={(e) => setSearch(e.target.value)}
         style={{ width: "100%", padding: "10px", marginTop: "10px" }}
       />
-      <br />
-      <button className="btn btn-primary" style={{ marginTop: "10px" }}>
-        Buscar
-      </button>
       <div className="container mt-3">
         <div className="row g-3">
           {filteredProducts.map((product) => (
@@ -66,7 +70,7 @@ const Home = ({ addToCart, cartCount, navigateToCart }) => {
               <div className="card h-100">
                 <div className="card-body">
                   <h5 className="card-title">{product.nome}</h5>
-                  <p className="card-text">R$ {product.preco.toFixed(2)}</p>
+                  <p className="card-text">{formatCurrency(product.preco)}</p>
                   <button
                     className="btn btn-primary mt-auto w-100"
                     onClick={() => addToCart(product.id)}
@@ -75,7 +79,6 @@ const Home = ({ addToCart, cartCount, navigateToCart }) => {
                   </button>
                 </div>
               </div>
-
               {hoveredProduct === product.id && (
                 <div
                   style={{
@@ -103,6 +106,7 @@ const Home = ({ addToCart, cartCount, navigateToCart }) => {
   );
 };
 
+// Página do Carrinho
 const Cart = ({ cartItems }) => {
   return (
     <div>
@@ -116,18 +120,25 @@ const Cart = ({ cartItems }) => {
           </tr>
         </thead>
         <tbody>
-          {Object.entries(cartItems).map(([id, quantity]) => (
-            <tr key={id}>
-              <td>{id}</td>
-              <td>{quantity}</td>
+          {cartItems.length > 0 ? (
+            cartItems.map((item) => (
+              <tr key={item.produto_id}>
+                <td>{item.produto_id}</td>
+                <td>{item.quantidade}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="2">Carrinho vazio</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
   );
 };
 
+// Gerenciamento de Rotas
 const AppRoutes = ({ cartItems, addToCart }) => {
   const navigate = useNavigate();
 
@@ -135,7 +146,7 @@ const AppRoutes = ({ cartItems, addToCart }) => {
     navigate("/checkout/cart");
   };
 
-  const cartCount = Object.values(cartItems).reduce((acc, quantity) => acc + quantity, 0);
+  const cartCount = cartItems.reduce((acc, item) => acc + item.quantidade, 0);
 
   return (
     <Routes>
@@ -149,35 +160,56 @@ const AppRoutes = ({ cartItems, addToCart }) => {
   );
 };
 
+// Componente Principal
 const App = ({ userIdProp }) => {
   const [userId, setUserId] = useState(userIdProp || localStorage.getItem("userId"));
-  const [cartItems, setCartItems] = useState({});
-
+  const [cartItems, setCartItems] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!userId) {
-      console.error("userId não foi definido");
+      console.error("⚠️ Erro: userId não foi definido!");
       return;
     }
-    cartstore.init(userId);
-    setCartItems(cartstore.getCart());
+    fetchCart(userId);
 
-    const syncCart = () => setCartItems(cartstore.getCart());
+    const syncCart = () => fetchCart(userId);
     window.addEventListener("cart-updated", syncCart);
     return () => window.removeEventListener("cart-updated", syncCart);
   }, [userId]);
 
-  const addToCart = (id) => {
-    cartstore.addToCart(id);
-    setCartItems({ ...cartstore.getCart() });
+  const fetchCart = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:4000/api/cart/${userId}`);
+      if (!response.ok) throw new Error("Erro ao buscar carrinho");
+      const cartData = await response.json();
+      setCartItems(cartData.itens || []);
+    } catch (error) {
+      console.error("Erro ao buscar carrinho:", error);
+      setCartItems([]);
+    }
+  };
+
+  const addToCart = async (produtoId) => {
+    if (!userId) {
+      console.error("⚠️ Erro: Tentativa de adicionar ao carrinho sem userId!");
+      return;
+    }
+
+    await fetch("http://localhost:4000/api/cart/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, produtoId, quantidade: 1 }),
+    });
+
+    fetchCart(userId);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("userId");
-    cartstore.clearCart();
     setUserId(null);
-    navigate("/"); 
+    setCartItems([]);
+    navigate("/");
   };
 
   return (
@@ -188,6 +220,7 @@ const App = ({ userIdProp }) => {
   );
 };
 
+// Configuração do Microfrontend
 const Root = (props) => (
   <BrowserRouter>
     <App {...props} />
@@ -198,9 +231,6 @@ const lifecycles = singleSpaReact({
   React,
   ReactDOM,
   rootComponent: Root,
-  errorBoundary(err, info, props) {
-    return <div>Erro ao carregar o aplicativo</div>;
-  },
   domElementGetter: () => document.getElementById("app-react"),
 });
 

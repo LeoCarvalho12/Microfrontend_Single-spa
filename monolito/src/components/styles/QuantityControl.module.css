@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 2px solid #ffcc00;
+  border-radius: 20px;
+  padding: 5px 10px;
+  background: white;
+  width: 120px;
+}
+
+.controlButton:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: black;
+  padding: 2px 5px;
+  transition: 0.3s ease;
+}
+
+.iconButton:hover {
+  color: red;
+}
+
+.quantity {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 5px;
+  color: black;
+}

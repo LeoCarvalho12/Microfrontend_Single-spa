@@ -1,14 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, provideRouter } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule,RouterOutlet],
+  imports: [RouterModule],
   template: `<router-outlet></router-outlet>`
 })
-export class AppComponent {
-  constructor() {
-  }
-}
+export class AppComponent {}

@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>🛒 Carrinho de Compras</h1>
-    <router-link to="/product">← Voltar para Lista</router-link>
+    <a href="/product">← Voltar para Lista</a>
 
     <table v-if="cartProducts.length > 0" border="1" cellPadding="10" style="margin-top: 20px; width: 100%;">
       <thead>
@@ -14,19 +14,20 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="product in cartProducts" :key="product.id">
-          <td>{{ product.nome }}</td>
-          <td>{{ product.quantity }}</td>
-          <td>R$ {{ product.preco.toFixed(2) }}</td>
-          <td>R$ {{ (product.preco * product.quantity).toFixed(2) }}</td>
+        <tr v-for="item in cartProducts" :key="item.id">
+          <td>{{ item.nome || 'Produto Desconhecido' }}</td>
+          <td>{{ item.quantidade || 0 }}</td>
+          <td>{{ formatCurrency(item.preco) }}</td>
+          <td>{{ formatCurrency((item.preco || 0) * (item.quantidade || 0)) }}</td>
           <td>
-            <button class="btn btn-danger" @click="removeItem(product.id)">🗑️</button>
+            <button class="btn btn-danger" @click="removeItem(item.id)">🗑️</button>
           </td>
         </tr>
       </tbody>
     </table>
 
     <p v-else>Seu carrinho está vazio.</p>
+
     <button v-if="cartProducts.length > 0" class="btn btn-success" @click="goToPay">
       Ir para Pagamento →
     </button>
@@ -34,57 +35,47 @@
 </template>
 
 <script>
-import { cartstore } from "../cartstore"; 
+import { ref, onMounted, watchEffect } from "vue";
+import { useRouter } from "vue-router";
+import { cartstore } from "../cartstore";
 
 export default {
-  data() {
-    return {
-      cartItems: {},
-      cartProducts: [],
-    };
-  },
-  methods: {
-    async updateCart() {
-      this.cartItems = cartstore.getCart();
-      const productIds = Object.keys(this.cartItems);
+  setup() {
+    const cartProducts = ref([]);
+    const router = useRouter();
 
-      if (productIds.length > 0) {
-        try {
-          console.log("Buscando produtos do carrinho...");
-          const response = await fetch(`http://localhost:4000/api/products/details?ids=${productIds.join(",")}`);
-          const products = await response.json();
-          
-          this.cartProducts = products.map(product => ({
-            ...product,
-            quantity: this.cartItems[product.id],
-          }));
-        } catch (error) {
-          console.error("Erro ao buscar produtos do carrinho:", error);
-        }
-      } else {
-        this.cartProducts = [];
+    onMounted(async () => {
+      const userId = localStorage.getItem("userId");
+      if (userId) {
+        await cartstore.init(userId);
       }
-    },
-    removeItem(id) {
-      cartstore.removeFromCart(id);
-      this.updateCart();
-    },
-    goToPay() {
-      this.$router.push("/checkout/pay");
-    }
-  },
-  created() {
-    const userId = localStorage.getItem("userId");
-    if (userId) {
-      cartstore.init(userId);
-    } else {
-      console.error("userId não definido no localStorage.");
-    }
-    this.updateCart();
-    window.addEventListener("cart-updated", this.updateCart);
-  },
-  beforeUnmount() {
-    window.removeEventListener("cart-updated", this.updateCart);
+    });
+
+    watchEffect(() => {
+      cartProducts.value = cartstore.cartItems.map(item => ({
+        id: item.produto?.id || item.Produtos_id || null,
+        nome: item.produto?.nome || "Produto Desconhecido",
+        preco: parseFloat(item.produto?.preco) || 0,
+        quantidade: item.quantidade || 1,
+      }));
+    });
+
+    const formatCurrency = (value) => {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(value);
+    };
+
+    const removeItem = async (produtoId) => {
+      await cartstore.removeFromCart(produtoId);
+    };
+
+    const goToPay = () => {
+      router.push("/checkout/pay");
+    };
+
+    return { cartProducts, removeItem, goToPay, formatCurrency };
   },
 };
 </script>
